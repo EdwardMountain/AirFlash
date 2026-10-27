@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 EdwardMountain
+Copyright (c) 2026 DoDo7
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Firmware updates carry an inherent risk. Writing the wrong firmware, or
+interrupting an update, can leave a device unable to start. You use this
+software entirely at your own risk: the author accepts no responsibility for
+damaged, bricked or malfunctioning devices, for lost time, or for any other
+consequence of its use. AirFlash is an independent project and is not
+affiliated with, endorsed by, or supported by GAODIMIC, infoSVC, Telink
+Semiconductor or any device manufacturer.
