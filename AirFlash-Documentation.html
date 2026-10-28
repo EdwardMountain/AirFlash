@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AirFlash Documentation</title>
+<style>
+:root{--bg:#f5f6f8;--panel:#fff;--fg:#17212b;--muted:#5c6b7a;--line:#d9dfe6;--accent:#1f5fbf;--soft:#e8eefb;--warn-bg:#fdf0d8;--warn:#9a5b00;--code:#eef1f4;
+  --sans:system-ui,-apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1419;--panel:#171d24;--fg:#e7ecf1;--muted:#95a3b1;--line:#2b343e;--accent:#6ea2ff;--soft:#1a2639;--warn-bg:#352813;--warn:#f0b65a;--code:#121820;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15.5px;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+header h1{font-size:26px;margin:0;letter-spacing:-.01em}
+header .sub{color:var(--muted);font-size:14px}
+.spacer{flex:1}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+.lang button{font:inherit;font-size:14px;font-weight:600;padding:6px 14px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--accent);color:#fff}
+nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:18px 0 28px;font-size:14px;columns:2;column-gap:24px}
+nav.toc a{display:block;color:var(--accent);text-decoration:none;padding:2px 0}
+@media(max-width:600px){nav.toc{columns:1}}
+h2{font-size:20px;margin:36px 0 10px;padding-top:8px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:20px 0 6px}
+p,ul,ol{margin:0 0 12px}
+li{margin:3px 0}
+code{font-family:var(--mono);font-size:.9em;background:var(--code);padding:1px 5px;border-radius:4px}
+pre{font-family:var(--mono);font-size:13px;background:var(--code);padding:12px 14px;border-radius:8px;overflow:auto;line-height:1.5}
+table{border-collapse:collapse;width:100%;margin:8px 0 16px;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:13px}
+.warn{background:var(--warn-bg);color:var(--warn);border-left:3px solid var(--warn);padding:10px 14px;border-radius:6px;margin:12px 0}
+.note{background:var(--soft);border-left:3px solid var(--accent);padding:10px 14px;border-radius:6px;margin:12px 0}
+.step{display:grid;grid-template-columns:30px 1fr;gap:10px;margin:10px 0}
+.step .n{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
+footer{margin-top:40px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+body [lang="zh"]{display:none}
+html.zh body [lang="zh"]{display:block} html.zh body [lang="en"]{display:none}
+html.zh body span[lang="zh"]{display:inline}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>AirFlash</h1><div class="sub" lang="en">Documentation · version 1.0 · by DoDo7</div><div class="sub" lang="zh">使用说明与技术文档 · 版本 1.0 · 作者 DoDo7</div></div>
+  <div class="spacer"></div>
+  <div class="lang" role="group" aria-label="Language"><button id="b-en" aria-pressed="true">English</button><button id="b-zh" aria-pressed="false">中文</button></div>
+</header>
+
+<!-- ============================ ENGLISH ============================ -->
+<div lang="en">
+<nav class="toc" lang="en">
+  <a href="#en-1">1. What AirFlash is</a><a href="#en-2">2. Requirements</a><a href="#en-3">3. Getting the page</a><a href="#en-4">4. Updating a device</a><a href="#en-5">5. Several devices at once</a><a href="#en-6">6. Settings</a><a href="#en-7">7. Troubleshooting</a><a href="#en-8">8. How it works (technical)</a><a href="#en-9">9. Test report</a><a href="#en-10">10. Notes for manufacturers</a><a href="#en-11">11. License and contact</a>
+</nav>
+
+<h2 id="en-1">1. What AirFlash is</h2>
+<p>AirFlash is a single web page that updates the firmware of Bluetooth Low Energy devices built on Telink chips, the devices whose manufacturer normally asks the user to install the Android app <em>OTA_Telink</em>. AirFlash speaks the same protocol as that app, but runs in the browser on Windows, macOS, Linux and Android. Nothing to install, nothing to download besides the firmware, and it works offline.</p>
+<p>It was written for the GAODIMIC DT228 wireless microphone system and tested on the DTT228-P transmitter and the DTR228-1R rack receiver. It should work with any device that exposes the Telink OTA service.</p>
+<div class="warn"><b>Warning.</b> Writing the wrong firmware, or cutting the power during an update, can leave a device unable to start. Use only firmware files provided by the manufacturer for your exact model and hardware revision. You use this tool at your own risk.</div>
+
+<h2 id="en-2">2. Requirements</h2>
+<table><tr><th>Browser</th><td><b>Chrome or Edge</b> (or another Chromium browser: Brave, Opera, Vivaldi). Safari and Firefox have no Web Bluetooth and cannot be used.</td></tr>
+<tr><th>Platform</th><td>Windows 10/11, macOS, Linux, Android (phone or tablet). <b>iPhone and iPad are not supported</b>: no browser on iOS has Web Bluetooth.</td></tr>
+<tr><th>Hardware</th><td>A Bluetooth 4.0 or newer adapter. Every laptop made in the last decade has one.</td></tr>
+<tr><th>Firmware</th><td>The <code>.bin</code> file for the device, from the manufacturer.</td></tr></table>
+
+<h2 id="en-3">3. Getting the page</h2>
+<ul>
+<li><b>Online:</b> open the project address in Chrome or Edge. The address must be <code>https://</code>.</li>
+<li><b>Offline:</b> download <code>AirFlash.html</code> and double-click it. If it opens in the wrong browser, right-click → <em>Open with</em> → Chrome.</li>
+</ul>
+<p>Bluetooth is blocked by the browser on plain <code>http://</code> addresses and inside frames embedded in other pages. AirFlash detects this and shows a message instead of failing silently.</p>
+<p>The first time, the browser asks permission to use Bluetooth. On macOS the system also asks once whether the browser may use Bluetooth; answer yes.</p>
+
+<h2 id="en-4">4. Updating a device</h2>
+<p>The page is laid out in the order of the work: firmware files on the left, one card per device on the right, a log at the bottom. Each card shows four steps, highlights the current one and explains it.</p>
+
+<div class="step"><div class="n">1</div><div><h3>Load the firmware</h3>
+<p>Drag the <code>.bin</code> file onto the box on the left, or click the box to choose it. Several files can be loaded at once (for example transmitter and receiver). Each file is checked before anything is sent: Telink signature, size field, CRC32. A file that fails is shown in red and cannot be flashed. Below the file name you see the version string and the device names embedded in it.</p></div></div>
+
+<div class="step"><div class="n">2</div><div><h3>Put the device in update mode and connect</h3>
+<p>Each device has a key combination to enter update (OTA) mode; it is in the manufacturer's manual. With the <b>GAODIMIC preset</b> enabled, the card shows it for the DT228 series:</p>
+<ul><li>Transmitter: hold <b>MENU</b> while powering on.</li><li>Rack receiver: hold <b>Left</b> while powering on.</li></ul>
+<p>Press <b>Connect</b>. The browser opens its device picker; select the device and confirm. After a couple of seconds the card shows <em>connected</em> and the device's Bluetooth name. If the device is missing from the picker, enable <em>Show all Bluetooth devices</em> in Settings and try again.</p></div></div>
+
+<div class="step"><div class="n">3</div><div><h3>Flash</h3>
+<p>AirFlash automatically selects the firmware whose embedded device name matches the connected device; the drop-down lets you change it. If the names do not match, a warning appears and <b>Flash</b> stays disabled, because this is exactly how a receiver image ends up on a transmitter. The check can be disabled in Settings for devices whose firmware carries no name.</p>
+<p>Press <b>Flash</b> and confirm. The progress bar shows packets sent and elapsed time. A typical update takes 30 to 90 seconds. Do not touch the device and do not close the page.</p>
+<p><b>Check</b> (optional) sends the version request and shows what the device answers, without writing anything.</p></div></div>
+
+<div class="step"><div class="n">4</div><div><h3>Done</h3>
+<p>After the last packet AirFlash sends the end command and the device <b>switches off or reboots by itself</b>. This is normal: the device is verifying the received image and starting the new firmware. The card then shows:</p>
+<ul><li><b>confirmed</b> – the device reported success (newer firmware only);</li>
+<li><b>sent</b> – all data was sent but this device does not report results (classic protocol, including the DT228). Switch it on normally and check the version in its menu;</li>
+<li><b>failed / stopped</b> – nothing was changed on the device; see Troubleshooting.</li></ul>
+<p>The card then returns to a clean state, ready for the next device.</p></div></div>
+
+<h2 id="en-5">5. Several devices at once</h2>
+<p>Press <b>+ Add device</b> to add a card. Every card is an independent flow with its own Bluetooth connection, firmware choice and progress. Connect each device, then press Flash on each card or <b>Flash all ready</b> to confirm them all together.</p>
+<p>Devices cannot interfere with each other: each BLE connection is a private link with its own access address and hopping sequence, and packets of one connection are discarded by the radio of every other device. The only effect of parallel updates is that each transfer is somewhat slower, because the computer alternates between connections. With many devices (five or more) work in smaller groups, because the device firmware limits the total duration of an update.</p>
+
+<h2 id="en-6">6. Settings</h2>
+<table><tr><th>Setting</th><th>Effect</th><th>Default</th></tr>
+<tr><td>GAODIMIC preset</td><td>Applies the settings below for GAODIMIC systems and shows the DT228 key combinations in the cards. Everything remains editable.</td><td>off</td></tr>
+<tr><td>Device name starts with</td><td>Filters the browser's device picker by name prefix.</td><td>empty (GAODIMIC with the preset)</td></tr>
+<tr><td>Show all Bluetooth devices</td><td>Lists every nearby device, not only those advertising the OTA service.</td><td>off</td></tr>
+<tr><td>Check firmware matches device</td><td>Blocks flashing when the device name is not found inside the firmware image.</td><td>on</td></tr>
+<tr><td>Sync read every N packets</td><td>A characteristic read every N packets, used as flow control. This is the "speed" slider of the official app.</td><td>8</td></tr>
+<tr><td>Pause between packets (ms)</td><td>Extra delay per packet. Keep at 0: the device limits the total update time and a slow transfer is rejected at the end.</td><td>0</td></tr>
+<tr><td>Write with acknowledgement</td><td>Uses acknowledged writes if the device supports them. Slower; the DT228 does not support it.</td><td>off</td></tr></table>
+<p>Language, preset and the numeric settings are remembered by the browser on that computer.</p>
+
+<h2 id="en-7">7. Troubleshooting</h2>
+<h3>The page says Bluetooth is not available</h3><p>Wrong browser (not Chromium-based), page opened from <code>http://</code>, or page embedded in a frame. Open <code>AirFlash.html</code> directly or the https address in its own tab.</p>
+<h3>The device is not in the picker</h3><p>Make sure it is really in update mode (the key must be held <em>while</em> powering on). Enable <em>Show all Bluetooth devices</em>. Move closer. On macOS check <em>System Settings → Privacy &amp; Security → Bluetooth</em> for the browser.</p>
+<h3>The device rebooted but the version did not change</h3><p>The device rejected the image at its final check. The most common cause is a transfer that took too long: set the pause to 0 and the sync read to 8 or more, and avoid updating many devices at once. Otherwise the file is for a different hardware revision.</p>
+<h3>The update stopped half-way</h3><p>Put the device back in update mode and run it again. Nothing has been changed: the new firmware is activated only after the complete, verified image has arrived.</p>
+<h3>The device shows a different Bluetooth name than before</h3><p>Some firmware carries two names: the advertising name and the GAP "Device Name". macOS caches the latter after the first connection and shows it from then on. The device is unchanged; AirFlash recognises both names.</p>
+<h3>"No OTA service"</h3><p>The device is not in update mode, or it is not a Telink-based device.</p>
+
+<h2 id="en-8">8. How it works (technical)</h2>
+<p>AirFlash implements the Telink BLE OTA protocol exactly as the Android app <em>OTA_Telink</em> (v2.0.1) does. Everything happens in the browser through the Web Bluetooth API; the firmware file never leaves the computer.</p>
+<h3>GATT</h3>
+<table><tr><th>Service</th><td><code>00010203-0405-0607-0809-0a0b0c0d1912</code></td></tr>
+<tr><th>Characteristic</th><td><code>00010203-0405-0607-0809-0a0b0c0d2b12</code> — properties <code>read</code>, <code>write-without-response</code>; <code>notify</code> on newer firmware</td></tr></table>
+<h3>Sequence</h3>
+<pre>FF00            prepare (version request)
+FF01            start
+packet 0 … N-1  data, written without response; a read every N packets as flow control
+FF02 + idx + ~idx + CRC16   end
+→ device verifies the image, activates it and reboots (newer firmware first notifies FF06 + result code)</pre>
+<h3>Data packet (20 bytes)</h3>
+<table><tr><th>Bytes</th><th>Content</th></tr>
+<tr><td>0–1</td><td>packet index, little-endian (0-based)</td></tr>
+<tr><td>2–17</td><td>16 bytes of firmware; the last packet is padded with <code>0xFF</code></td></tr>
+<tr><td>18–19</td><td>CRC-16/MODBUS (poly 0x8005 reflected = 0xA001, init 0xFFFF) over bytes 0–17, little-endian</td></tr></table>
+<h3>End command (8 bytes)</h3>
+<p><code>02 FF</code> · last index (u16 LE) · bitwise NOT of last index (u16 LE) · CRC-16/MODBUS over the preceding 6 bytes (u16 LE).</p>
+<h3>Firmware file validation</h3>
+<ul><li>Bytes 8–11 must read <code>KNLT</code> (Telink firmware mark).</li>
+<li>The 32-bit size field at offset <code>0x18</code> must equal the file size.</li>
+<li>CRC32 (init <code>0xFFFFFFFF</code>, <b>no</b> final XOR) over bytes <code>[0, size-4)</code> must equal the last 4 bytes.</li>
+<li>Printable strings of the form <code>BRAND_MODEL…</code> are extracted as embedded device names and compared with the connected device's name (two names stored back to back are split on the repeated brand prefix).</li></ul>
+<h3>Result codes (notification FF06, newer firmware)</h3>
+<pre>0 success            5 incomplete data        10 firmware mark error
+1 packet sequence    6 flow error             11 firmware size error
+2 invalid packet     7 firmware check failed  12 packet timeout
+3 data CRC error     8 version not accepted   13 OTA timeout
+4 flash write error  9 packet length error    14 connection terminated</pre>
+<h3>Safety model</h3>
+<p>The device writes the incoming image to a spare flash area and switches to it only after its own final check on the end command. An interrupted, corrupted or too-slow transfer leaves the previous firmware untouched. The only real risk is a <em>valid</em> image for the wrong hardware, which is why AirFlash compares embedded names before writing.</p>
+
+<h2 id="en-9">9. Test report</h2>
+<table><tr><th>Device</th><th>From</th><th>To</th><th>Result</th><th>Notes</th></tr>
+<tr><td>DTR228-1R rack receiver (kit DT228G-R)</td><td>1.0.4 (Apr 2025)</td><td>1.0.7 (Jun 2026)</td><td>OK</td><td>Classic protocol (no notifications). A first attempt with a 20 ms pause per packet (3 min total) was rejected by the device at the final check; with no pause (≈60 s) it succeeded. The device enforces a total time limit.</td></tr>
+<tr><td>DTT228-P portable transmitter</td><td>–</td><td>1.2.12 (Jun 2026)</td><td>OK</td><td>No pause, ≈45 s.</td></tr></table>
+<p>Platform: macOS, Chrome. Firmware files as published by the manufacturer, unmodified.</p>
+
+<h2 id="en-10">10. Notes for manufacturers</h2>
+<ul><li><b>Hosting:</b> upload <code>AirFlash.html</code> to any https web server; no server-side code is needed. Link it directly; do not embed it in an iframe (Bluetooth would be blocked).</li>
+<li><b>Branding:</b> the file is MIT-licensed. You may rename it, change the preset, colours and texts, or add your own device presets; keep the copyright notice in the file header.</li>
+<li><b>Presets:</b> the GAODIMIC preset is a few lines in <code>applyPreset()</code> and the <code>hintConnectG</code> strings of the language table. Another product line is a copy of those.</li>
+<li><b>Languages:</b> each language is one object in the <code>T</code> table with the same keys; adding one is adding an object and a flag.</li>
+<li><b>Newer firmware:</b> if a future firmware enables Telink's extended OTA (notifications, result code FF06), AirFlash already reports the result; the version-compare feature of the extended protocol is not used.</li></ul>
+
+<h2 id="en-11">11. License and contact</h2>
+<p>MIT License, with an explicit no-liability statement for firmware damage. AirFlash is an independent project, not affiliated with GAODIMIC, infoSVC or Telink Semiconductor; product names are used only to describe compatibility.</p>
+<p>Author: DoDo7. Questions and feedback through the project page.</p>
+</div>
+
+<!-- ============================ 中文 ============================ -->
+<div lang="zh">
+<nav class="toc" lang="zh">
+  <a href="#zh-1">1. AirFlash 是什么</a><a href="#zh-2">2. 使用条件</a><a href="#zh-3">3. 获取页面</a><a href="#zh-4">4. 升级一台设备</a><a href="#zh-5">5. 同时升级多台设备</a><a href="#zh-6">6. 设置</a><a href="#zh-7">7. 故障排除</a><a href="#zh-8">8. 工作原理（技术）</a><a href="#zh-9">9. 测试报告</a><a href="#zh-10">10. 给厂商的说明</a><a href="#zh-11">11. 许可与联系</a>
+</nav>
+
+<h2 id="zh-1">1. AirFlash 是什么</h2>
+<p>AirFlash 是一个单独的网页，用于升级基于 Telink 芯片的低功耗蓝牙设备的固件，也就是厂商通常要求用户安装 Android 应用 <em>OTA_Telink</em> 才能升级的那类设备。AirFlash 使用与该应用完全相同的协议，但直接在 Windows、macOS、Linux 和 Android 的浏览器中运行。无需安装，除固件外无需下载任何东西，并且可以离线使用。</p>
+<p>它最初是为 GAODIMIC DT228 无线话筒系统编写的，已在 DTT228-P 发射器和 DTR228-1R 机架接收器上测试通过。任何提供 Telink OTA 服务的设备都应当可以使用。</p>
+<div class="warn"><b>警告。</b>写入错误的固件，或在升级过程中断电，可能导致设备无法启动。请只使用厂商针对您的具体型号和硬件版本提供的固件文件。使用本工具的风险由您自行承担。</div>
+
+<h2 id="zh-2">2. 使用条件</h2>
+<table><tr><th>浏览器</th><td><b>Chrome 或 Edge</b>（或其他 Chromium 内核浏览器：Brave、Opera、Vivaldi）。Safari 和 Firefox 没有 Web Bluetooth，无法使用。</td></tr>
+<tr><th>平台</th><td>Windows 10/11、macOS、Linux、Android（手机或平板）。<b>不支持 iPhone 和 iPad</b>：iOS 上没有任何浏览器支持 Web Bluetooth。</td></tr>
+<tr><th>硬件</th><td>蓝牙 4.0 或更新的适配器。近十年内的笔记本电脑都有。</td></tr>
+<tr><th>固件</th><td>厂商提供的设备 <code>.bin</code> 文件。</td></tr></table>
+
+<h2 id="zh-3">3. 获取页面</h2>
+<ul>
+<li><b>在线：</b>在 Chrome 或 Edge 中打开项目地址。地址必须是 <code>https://</code>。</li>
+<li><b>离线：</b>下载 <code>AirFlash.html</code> 并双击打开。如果被其他浏览器打开，右键 → <em>打开方式</em> → Chrome。</li>
+</ul>
+<p>在普通的 <code>http://</code> 地址下，以及嵌入在其他页面的框架中时，浏览器会禁用蓝牙。AirFlash 会检测到这种情况并给出提示，而不是无声失败。</p>
+<p>第一次使用时，浏览器会请求蓝牙权限。在 macOS 上，系统还会询问一次是否允许浏览器使用蓝牙，请选择允许。</p>
+
+<h2 id="zh-4">4. 升级一台设备</h2>
+<p>页面按操作顺序布局：左侧是固件文件，右侧每台设备一张卡片，底部是日志。每张卡片显示四个步骤，高亮当前步骤并给出说明。</p>
+
+<div class="step"><div class="n">1</div><div><h3>加载固件</h3>
+<p>把 <code>.bin</code> 文件拖到左侧的方框中，或点击方框选择文件。可以同时加载多个文件（例如发射器和接收器）。每个文件在发送任何数据之前都会被检查：Telink 标识、大小字段、CRC32。未通过检查的文件以红色显示且无法写入。文件名下方会显示版本字符串和固件内嵌的设备名称。</p></div></div>
+
+<div class="step"><div class="n">2</div><div><h3>让设备进入升级模式并连接</h3>
+<p>每种设备都有进入升级（OTA）模式的按键组合，见厂商说明书。启用 <b>GAODIMIC 预设</b>后，卡片会直接显示 DT228 系列的操作方法：</p>
+<ul><li>发射器：开机时按住 <b>MENU</b>。</li><li>机架接收器：开机时按住 <b>Left</b>。</li></ul>
+<p>点击<b>连接</b>。浏览器会弹出设备选择框；选择设备并确认。几秒钟后卡片显示<em>已连接</em>及设备的蓝牙名称。如果设备没有出现在列表中，请在设置中启用<em>显示所有蓝牙设备</em>后重试。</p></div></div>
+
+<div class="step"><div class="n">3</div><div><h3>升级</h3>
+<p>AirFlash 会自动选择内嵌设备名称与所连接设备匹配的固件；也可以在下拉框中更改。如果名称不匹配，会显示警告并禁用<b>升级</b>按钮，因为这正是接收器固件被误刷到发射器上的典型情形。对于固件中不含名称的设备，可以在设置中关闭该检查。</p>
+<p>点击<b>升级</b>并确认。进度条显示已发送的包数和耗时。通常一次升级需要 30 到 90 秒。期间请不要操作设备，也不要关闭页面。</p>
+<p><b>检测</b>（可选）会发送版本请求并显示设备的回应，不写入任何数据。</p></div></div>
+
+<div class="step"><div class="n">4</div><div><h3>完成</h3>
+<p>最后一个数据包发送完毕后，AirFlash 发送结束命令，设备会<b>自动关机或重启</b>。这是正常现象：设备正在校验收到的镜像并启动新固件。随后卡片显示：</p>
+<ul><li><b>已确认</b> – 设备报告成功（仅较新固件支持）；</li>
+<li><b>已发送</b> – 数据已全部发送，但该设备不返回结果（经典协议，包括 DT228）。正常开机后请在菜单中查看版本；</li>
+<li><b>失败 / 已中止</b> – 设备未发生任何改变；见故障排除。</li></ul>
+<p>之后卡片恢复为初始状态，可以接着处理下一台设备。</p></div></div>
+
+<h2 id="zh-5">5. 同时升级多台设备</h2>
+<p>点击 <b>+ 添加设备</b>可以新增一张卡片。每张卡片是一个独立的流程，拥有自己的蓝牙连接、固件选择和进度。逐一连接各设备后，可以分别点击各卡片的升级按钮，或点击<b>升级所有就绪设备</b>一起确认。</p>
+<p>各设备之间不会相互干扰：每条 BLE 连接都是私有链路，有各自的接入地址和跳频序列，一条连接的数据包会被其他设备的射频硬件直接丢弃。并行升级的唯一影响是每台设备的传输速度会稍慢，因为电脑在多条连接间轮流发送。设备数量较多（五台以上）时请分批进行，因为设备固件对整个升级过程有总时长限制。</p>
+
+<h2 id="zh-6">6. 设置</h2>
+<table><tr><th>设置项</th><th>作用</th><th>默认值</th></tr>
+<tr><td>GAODIMIC 预设</td><td>为 GAODIMIC 系统应用下列设置，并在卡片中显示 DT228 的按键组合。所有项仍可手动修改。</td><td>关</td></tr>
+<tr><td>设备名称开头为</td><td>按名称前缀过滤浏览器的设备选择框。</td><td>空（启用预设时为 GAODIMIC）</td></tr>
+<tr><td>显示所有蓝牙设备</td><td>列出附近所有设备，而不仅是广播 OTA 服务的设备。</td><td>关</td></tr>
+<tr><td>检查固件与设备是否匹配</td><td>固件镜像中找不到设备名称时禁止写入。</td><td>开</td></tr>
+<tr><td>每 N 包同步读取一次</td><td>每 N 个数据包读取一次特征，用作流控。对应官方应用中的"速度"滑块。</td><td>8</td></tr>
+<tr><td>包间隔（毫秒）</td><td>每个数据包之间的额外延时。请保持为 0：设备限制升级总时长，传输过慢会在最后被拒绝。</td><td>0</td></tr>
+<tr><td>带确认写入</td><td>设备支持时使用带确认的写入。速度较慢；DT228 不支持。</td><td>关</td></tr></table>
+<p>语言、预设和数值设置会由该电脑上的浏览器记住。</p>
+
+<h2 id="zh-7">7. 故障排除</h2>
+<h3>页面提示蓝牙不可用</h3><p>浏览器不是 Chromium 内核，或页面是通过 <code>http://</code> 打开的，或页面被嵌入在框架中。请直接打开 <code>AirFlash.html</code>，或在独立标签页中打开 https 地址。</p>
+<h3>设备没有出现在选择框中</h3><p>确认设备确实处于升级模式（必须在<em>开机的同时</em>按住按键）。启用<em>显示所有蓝牙设备</em>。靠近一些。macOS 上请检查<em>系统设置 → 隐私与安全性 → 蓝牙</em>中浏览器的权限。</p>
+<h3>设备重启了，但版本没有变化</h3><p>设备在最终校验时拒绝了镜像。最常见的原因是传输时间过长：把间隔设为 0、同步读取设为 8 或更大，并避免同时升级过多设备。否则就是文件对应的硬件版本不同。</p>
+<h3>升级中途停止</h3><p>让设备重新进入升级模式并再次运行。设备没有任何改变：只有在完整且校验通过的镜像到达后，新固件才会被激活。</p>
+<h3>设备显示的蓝牙名称与之前不同</h3><p>有些固件带有两个名称：广播名称和 GAP"设备名称"。macOS 在第一次连接后会缓存后者并一直显示它。设备本身没有变化；AirFlash 能识别这两个名称。</p>
+<h3>提示"无 OTA 服务"</h3><p>设备未处于升级模式，或者它不是基于 Telink 的设备。</p>
+
+<h2 id="zh-8">8. 工作原理（技术）</h2>
+<p>AirFlash 实现的 Telink BLE OTA 协议与 Android 应用 <em>OTA_Telink</em>（v2.0.1）完全一致。所有操作都通过 Web Bluetooth API 在浏览器中完成；固件文件不会离开电脑。</p>
+<h3>GATT</h3>
+<table><tr><th>服务</th><td><code>00010203-0405-0607-0809-0a0b0c0d1912</code></td></tr>
+<tr><th>特征</th><td><code>00010203-0405-0607-0809-0a0b0c0d2b12</code> — 属性 <code>read</code>、<code>write-without-response</code>；较新固件还有 <code>notify</code></td></tr></table>
+<h3>流程</h3>
+<pre>FF00            准备（版本请求）
+FF01            开始
+数据包 0 … N-1   无响应写入；每 N 包读取一次特征作为流控
+FF02 + 索引 + ~索引 + CRC16   结束
+→ 设备校验镜像、激活并重启（较新固件会先通过通知发送 FF06 + 结果码）</pre>
+<h3>数据包（20 字节）</h3>
+<table><tr><th>字节</th><th>内容</th></tr>
+<tr><td>0–1</td><td>包索引，小端序（从 0 开始）</td></tr>
+<tr><td>2–17</td><td>16 字节固件数据；最后一个包用 <code>0xFF</code> 填充</td></tr>
+<tr><td>18–19</td><td>对字节 0–17 计算的 CRC-16/MODBUS（多项式 0x8005 反射 = 0xA001，初值 0xFFFF），小端序</td></tr></table>
+<h3>结束命令（8 字节）</h3>
+<p><code>02 FF</code> · 最后一个包的索引（u16 LE）· 该索引按位取反（u16 LE）· 对前 6 字节计算的 CRC-16/MODBUS（u16 LE）。</p>
+<h3>固件文件校验</h3>
+<ul><li>字节 8–11 必须为 <code>KNLT</code>（Telink 固件标识）。</li>
+<li>偏移 <code>0x18</code> 处的 32 位大小字段必须等于文件大小。</li>
+<li>对字节 <code>[0, size-4)</code> 计算的 CRC32（初值 <code>0xFFFFFFFF</code>，<b>无</b>最终异或）必须等于最后 4 个字节。</li>
+<li>提取形如 <code>品牌_型号…</code> 的可打印字符串作为内嵌设备名称，并与所连接设备的名称比较（两个名称紧挨存放时，按重复的品牌前缀拆分）。</li></ul>
+<h3>结果码（通知 FF06，较新固件）</h3>
+<pre>0 成功             5 数据不完整         10 固件标识错误
+1 包序号错误       6 流程错误           11 固件大小错误
+2 无效的包         7 固件校验失败       12 包超时
+3 数据 CRC 错误    8 版本不被接受       13 OTA 超时
+4 Flash 写入错误   9 包长度错误         14 连接已终止</pre>
+<h3>安全模型</h3>
+<p>设备把收到的镜像写入备用 Flash 区域，只有在收到结束命令并通过自身最终校验后才切换到新镜像。中断、损坏或过慢的传输都不会影响原有固件。唯一真正的风险是把一个<em>有效</em>的镜像写入错误的硬件，因此 AirFlash 在写入前会比对内嵌名称。</p>
+
+<h2 id="zh-9">9. 测试报告</h2>
+<table><tr><th>设备</th><th>原版本</th><th>新版本</th><th>结果</th><th>备注</th></tr>
+<tr><td>DTR228-1R 机架接收器（DT228G-R 套装）</td><td>1.0.4（2025 年 4 月）</td><td>1.0.7（2026 年 6 月）</td><td>成功</td><td>经典协议（无通知）。第一次尝试时每包间隔 20 ms（总计 3 分钟），设备在最终校验时拒绝；改为无间隔（约 60 秒）后成功。设备对总时长有限制。</td></tr>
+<tr><td>DTT228-P 便携发射器</td><td>–</td><td>1.2.12（2026 年 6 月）</td><td>成功</td><td>无间隔，约 45 秒。</td></tr></table>
+<p>平台：macOS，Chrome。固件文件为厂商发布的原始文件，未作修改。</p>
+
+<h2 id="zh-10">10. 给厂商的说明</h2>
+<ul><li><b>部署：</b>把 <code>AirFlash.html</code> 上传到任意 https 网站服务器即可，无需服务端代码。请直接链接该页面，不要嵌入 iframe（蓝牙会被禁用）。</li>
+<li><b>品牌定制：</b>文件采用 MIT 许可。可以重命名、修改预设、配色和文字，或添加自己的设备预设；请保留文件头部的版权声明。</li>
+<li><b>预设：</b>GAODIMIC 预设只是 <code>applyPreset()</code> 中的几行代码和语言表中的 <code>hintConnectG</code> 字符串。为其他产品线添加预设只需复制这些内容。</li>
+<li><b>语言：</b>每种语言是 <code>T</code> 表中的一个对象，键名相同；新增语言只需新增一个对象和一面旗帜。</li>
+<li><b>较新固件：</b>如果将来的固件启用了 Telink 的扩展 OTA（通知、结果码 FF06），AirFlash 已能报告结果；扩展协议中的版本比较功能未使用。</li></ul>
+
+<h2 id="zh-11">11. 许可与联系</h2>
+<p>MIT 许可，并附有关于固件损坏的明确免责声明。AirFlash 是独立项目，与 GAODIMIC、infoSVC 或 Telink Semiconductor 无关；产品名称仅用于说明兼容性。</p>
+<p>作者：DoDo7。问题与反馈请通过项目页面提交。</p>
+</div>
+
+<footer><span lang="en">AirFlash Documentation · MIT License · by DoDo7</span><span lang="zh">AirFlash 文档 · MIT 许可 · 作者 DoDo7</span></footer>
+</div>
+<script>
+(function(){
+  var root=document.documentElement, be=document.getElementById('b-en'), bz=document.getElementById('b-zh');
+  function set(l){ root.classList.toggle('zh', l==='zh'); root.lang=l; be.setAttribute('aria-pressed', l==='en'); bz.setAttribute('aria-pressed', l==='zh');
+    document.title = l==='zh' ? 'AirFlash 文档' : 'AirFlash Documentation'; try{localStorage.setItem('airflash.doc.lang',l);}catch(e){} }
+  be.onclick=function(){set('en')}; bz.onclick=function(){set('zh')};
+  var l='en'; try{ l=localStorage.getItem('airflash.doc.lang') || ((navigator.language||'').slice(0,2)==='zh'?'zh':'en'); }catch(e){}
+  set(l);
+})();
+</script>
+</body>
+</html>

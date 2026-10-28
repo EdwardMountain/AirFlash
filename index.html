@@ -1,4 +1,34 @@
 <!doctype html>
+<!--
+  AirFlash — Bluetooth firmware updater for Telink-based devices
+  by DoDo7 · MIT License (see LICENSE) · No warranty: flashing the wrong firmware can brick a device.
+
+  WHAT IT IS
+    A single self-contained HTML file. No build step, no dependencies, no network requests
+    (fonts are embedded). It uses the Web Bluetooth API, so it runs in Chrome/Edge on
+    Windows, macOS, Linux and Android. Not Safari/Firefox/iOS (no Web Bluetooth there).
+
+  STRUCTURE OF THIS FILE
+    1. <style>   embedded fonts, design tokens (light/dark), layout
+    2. markup    header (language flags), left rail (firmware + settings), device flows, log
+    3. <script>  i18n table → helpers → protocol (CRC, packets) → firmware analysis →
+                 settings → Web Bluetooth support check → Flow class (one per device) → language
+
+  PROTOCOL (Telink BLE OTA, same as the Android app "OTA_Telink")
+    Service        00010203-0405-0607-0809-0a0b0c0d1912
+    Characteristic 00010203-0405-0607-0809-0a0b0c0d2b12  (read, write-without-response, optional notify)
+    Sequence       FF00 prepare → FF01 start → data packets → FF02 end → device verifies and reboots
+    Data packet    20 bytes: index (u16 LE) + 16 bytes of firmware (padded 0xFF) + CRC-16/MODBUS (u16 LE)
+    End command    8 bytes:  02 FF + last index (u16 LE) + ~last index (u16 LE) + CRC-16/MODBUS over the 6 bytes
+    Flow control   one characteristic read every N packets (N = "speed" of the official app, default 8)
+    Result         newer firmware notifies FF06 + result code; classic firmware gives no result
+    Timing         the device limits the total duration of an update: keep the pause at 0 ms
+
+  FIRMWARE FILE CHECKS (before anything is sent)
+    "KNLT" signature at offset 8 · size field at 0x18 must equal file size ·
+    CRC32 (init 0xFFFFFFFF, no final XOR) over [0, size-4) must equal the last 4 bytes ·
+    embedded device names (BRAND_MODEL strings) are compared with the connected device's name
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -198,7 +228,7 @@ code{font-family:var(--mono);font-size:.92em}
 
 <script>
 (() => {
-// ---------- i18n ----------
+// ---------- i18n: one object per language, same keys everywhere; t(key, params) resolves the current one ----------
 const LANGS = { en:"🇬🇧", it:"🇮🇹", de:"🇩🇪", fr:"🇫🇷", es:"🇪🇸", pt:"🇵🇹", ru:"🇷🇺", zh:"🇨🇳", ja:"🇯🇵", ko:"🇰🇷" };
 const T = {
 en:{browserReq:"Works only in Chrome or Edge (desktop or Android). Not Safari, Firefox, iPhone or iPad.",tagline:"Bluetooth firmware updater",stepFw:"Firmware",dropTitle:"Drop .bin files here",dropSub:"or click to choose. You can load several.",settings:"Settings",presetHint:"Preset for GAODIMIC wireless systems",optFilter:"Device name starts with",optAll:"Show all Bluetooth devices",optNameCheck:"Check firmware matches device",optRead:"Sync read every N packets",optDelay:"Pause between packets (ms)",optResp:"Write with acknowledgement",flowsTitle:"Devices",addFlow:"+ Add device",flashAll:"Flash all ready",log:"Log",clearLog:"Clear",footWarn:"Wrong firmware can leave a device unable to start. Keep it powered during the update.",footProto:"Telink BLE OTA protocol · Chrome / Edge on desktop or Android",
@@ -327,13 +357,14 @@ function log(msg, cls) {
   logEl.appendChild(s); logEl.scrollTop = logEl.scrollHeight;
 }
 
-// ---------- protocol ----------
+// ---------- protocol: CRC tables and packet builders ----------
 const SVC = "00010203-0405-0607-0809-0a0b0c0d1912";
 const CHR = "00010203-0405-0607-0809-0a0b0c0d2b12";
 const T32 = new Uint32Array(256);
 for (let i = 0; i < 256; i++) { let c = i; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; T32[i] = c >>> 0; }
 const crc32 = buf => { let c = 0xFFFFFFFF; for (const b of buf) c = T32[(c ^ b) & 0xFF] ^ (c >>> 8); return c >>> 0; }; // Telink variant: no final xor
 const crc16 = buf => { let c = 0xFFFF; for (const b of buf) { c ^= b; for (let i = 0; i < 8; i++) c = c & 1 ? (c >>> 1) ^ 0xA001 : c >>> 1; } return c; };
+// Split the firmware into 20-byte OTA packets: [index LE16][16 data bytes, 0xFF padded][CRC16 LE]
 function packets(u) {
   const n = Math.ceil(u.length / 16), out = [];
   for (let i = 0; i < n; i++) {
@@ -343,13 +374,15 @@ function packets(u) {
   }
   return out;
 }
+// End command: 02 FF, last index, bitwise-NOT of last index, CRC16 of the preceding 6 bytes (official app format)
 function endCmd(last) {
   const e = new Uint8Array([0x02, 0xFF, last & 0xFF, last >> 8, (~last) & 0xFF, ((~last) >> 8) & 0xFF, 0, 0]);
   const c = crc16(e.subarray(0, 6)); e[6] = c & 0xFF; e[7] = c >> 8; return e;
 }
 
-// ---------- firmware ----------
+// ---------- firmware: parse and validate a .bin ----------
 const firmwares = [];
+// Returns {name,data,size,errors[],names[],version}. errors are i18n keys; an empty list means the file is valid.
 function analyze(name, buf) {
   const u = new Uint8Array(buf), dv = new DataView(buf), errors = [];
   if (u.length < 0x40) return { name, data: u, size: u.length, errors: ["eSmall"], names: [], version: "?" };
@@ -358,6 +391,8 @@ function analyze(name, buf) {
   if (dv.getUint32(u.length - 4, true) !== crc32(u.subarray(0, u.length - 4))) errors.push("eCrc");
   let s = "", strings = [];
   for (const b of u) { if (b >= 32 && b < 127) s += String.fromCharCode(b); else { if (s.length >= 6) strings.push(s); s = ""; } }
+  // Device names embedded in the image (e.g. GAODIMIC_DT228_TX). Two names may be stored back to back
+  // without a separator (GAODIMIC_DTR228_SRGAODIMIC_DTR221_RX): split on the repeated brand prefix.
   const names = [...new Set(strings.filter(x => /^[A-Z][A-Z0-9]{3,}_[A-Z0-9_]+/.test(x)).flatMap(x => {
     const prefix = x.split("_")[0] + "_"; return x.split(new RegExp("(?=" + prefix + ")")).filter(Boolean);
   }))];
@@ -421,8 +456,9 @@ let bleOk = true;
   if (k) { bleOk = false; $("support").hidden = false; $("support").dataset.k = k; }
 })();
 
-// ---------- flows ----------
-const RESULT_KEYS = 15;
+// ---------- flows: one Flow instance per device card ----------
+// Each Flow owns its own BluetoothDevice, characteristic and state, so several devices can be
+// updated concurrently; they share only the loaded firmware list and the settings.
 const flows = [];
 let flowSeq = 0;
 class Flow {
@@ -509,6 +545,7 @@ class Flow {
   }
   onDisconnect() { this.device = null; this.chr = null; this.props = null; if (!this.busy) this.setState("disc"); }
   disconnect() { if (this.device?.gatt?.connected) this.device.gatt.disconnect(); this.onDisconnect(); }
+  // Notifications (newer Telink OTA only): FF06 = result code, FF00 = version reply
   onNotify(ev) {
     const v = new Uint8Array(ev.target.value.buffer);
     if (v.length >= 3 && v[1] === 0xFF && v[0] === 0x06) { this.result = v[2]; log(t("lResult", { d: this.label, c: v[2], t: t("r" + v[2]) }), v[2] === 0 ? "g" : "e"); return; }
@@ -538,6 +575,7 @@ class Flow {
     const c = el("button", "", t("cancel")); c.addEventListener("click", () => { this.confirmBox.hidden = true; });
     row.appendChild(y); row.appendChild(c); this.confirmBox.appendChild(row);
   }
+  // The OTA transfer itself. Runs entirely on this flow's own connection.
   async flash() {
     if (!this.canFlash()) return;
     const fw = this.fw, o = opts(), pk = packets(fw.data), name = this.label;
@@ -546,14 +584,14 @@ class Flow {
     const t0 = performance.now(); let wake = null; try { wake = await navigator.wakeLock?.request("screen"); } catch {}
     try {
       log(t("lStart", { d: name, n: pk.length, r: o.readEvery, ms: o.delay }));
-      await this.write(new Uint8Array([0x00, 0xFF]));
-      await this.write(new Uint8Array([0x01, 0xFF]));
+      await this.write(new Uint8Array([0x00, 0xFF])); // FF00 prepare
+      await this.write(new Uint8Array([0x01, 0xFF])); // FF01 start
       await sleep(100);
       for (let i = 0; i < pk.length; i++) {
         if (this.result !== null && this.result !== 0) throw new Error(t("lDevErr"));
         if (!this.device?.gatt?.connected) throw new Error(t("lLost"));
         await this.write(pk[i]);
-        if (this.props.read && !(o.resp && this.props.write) && (i + 1) % o.readEvery === 0) await this.chr.readValue();
+        if (this.props.read && !(o.resp && this.props.write) && (i + 1) % o.readEvery === 0) await this.chr.readValue(); // flow control
         if (o.delay) await sleep(o.delay);
         if (i % 25 === 0 || i === pk.length - 1) {
           this.prog.value = (i + 1) * 100 / pk.length;
@@ -562,6 +600,7 @@ class Flow {
       }
       log(t("lEnd", { d: name }));
       try { await this.write(endCmd(pk.length - 1)); } catch { log(t("lEndClosed", { d: name }), "w"); }
+      // Classic firmware reboots immediately after FF02 (connection drops); newer firmware notifies FF06 first.
       for (let i = 0; i < 30 && this.result === null; i++) await sleep(100);
       const secs = ((performance.now() - t0) / 1000).toFixed(0);
       if (this.result === 0) { this.state = "ok"; log(t("lOk", { d: name }), "g"); this.statText = `✓ ${fw.version} · ${secs} s`; }

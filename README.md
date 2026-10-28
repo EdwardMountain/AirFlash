@@ -10,6 +10,8 @@ It was born out of a practical problem: a GAODIMIC DT228 wireless microphone sys
 
 ---
 
+Full manual, technical description of the protocol and test report: **[AirFlash-Documentation.html](AirFlash-Documentation.html)** (English / 中文).
+
 ## Requirements
 
 | | |
